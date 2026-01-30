@@ -46,19 +46,32 @@ def get_embedding_features(tokens_df, method="BERT", device=None):
             features = outputs.pooler_output  # (batch_size, 768)
 
     elif method == "GPT-2":
+        features_list = []
         model = GPT2Model.from_pretrained("gpt2").to(device)
         model.eval()
 
-        with torch.no_grad():
-            outputs = model(input_ids=input_ids, attention_mask=attention_mask)
-            last_hidden_states = outputs.last_hidden_state
-            features = torch.mean(last_hidden_states, dim=1)
+        for idx, row in tokens_df.iterrows():
+            input_ids = torch.tensor(row["input_ids"]).unsqueeze(0).to(device)
+            attention_mask = torch.tensor(row["attention_mask"]).unsqueeze(0).to(device)
+
+            with torch.no_grad():
+                outputs = model(input_ids=input_ids, attention_mask=attention_mask)
+                pooled = outputs.last_hidden_state.mean(dim=1)
+
+            features_list.append(pooled.squeeze().cpu().numpy())
+
+            # free memory
+            del input_ids, attention_mask, outputs, pooled
+
+        return pd.DataFrame(features_list)
+
 
     else:
         raise ValueError("method must be either 'BERT' or 'GPT-2'")
 
     # Convert to DataFrame for ML + CSV compatibility
     features_df = pd.DataFrame(features.cpu().numpy())
+    print("\n\n" + 10*"=" + "Running embedding successfully" + 10*"=")
     return features_df
 
 from tokenize_layer.tokenizer import Tokenizer
@@ -66,10 +79,15 @@ from data.read_data import load_data
 
 data = load_data()
 
-tokens = Tokenizer(data["review"], method="BERT")
+# tokens = Tokenizer(data["review"], method="BERT")
+# tokens = Tokenizer(data["review"], method="GPT-2")
 
-bert_embeddings = get_embedding_features(tokens, method="BERT")
+# bert_embeddings = get_embedding_features(tokens, method="BERT")
+# gpt_2_embeddings = get_embedding_features(tokens, method="GPT-2")
 
-BERT_output_path = "../data/embedded_data/BERT_embedded_result.csv"
-bert_embeddings.to_csv(BERT_output_path, index=False)
+# BERT_output_path = "../data/embedded_data/BERT_embedded_result.csv"
+# GPT_2_output_path = "../data/embedded_data/GPT-2_embedded_result.csv"
+
+# bert_embeddings.to_csv(BERT_output_path, index=False)
+# gpt_2_embeddings.to_csv(GPT_2_output_path, index=False)
 

@@ -12,8 +12,6 @@ from transformers import BertTokenizer, GPT2TokenizerFast
 from data.read_data import load_data
 import pandas as pd
 
-data = load_data()
-
 def print_token(tokenizer, text, max_tokens=50):
   tokens = tokenizer.tokenize(text)
   print(f"WORDS: {text} \n-> TOKENS: {tokens[:max_tokens]}")
@@ -51,10 +49,6 @@ def Tokenizer(texts, method="BERT", max_length=128):
     "input_ids": encodings["input_ids"],
     "attention_mask": encodings["attention_mask"]
   })
-
-
-# result = Tokenizer(data["review"], method="BERT")
-# result = Tokenizer(data["review"], method="GPT-2")
 
 # ========== BERT tokenizer mechanism ==========
 # WORDS: One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked. '
