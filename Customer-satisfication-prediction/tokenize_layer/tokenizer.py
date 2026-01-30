@@ -41,11 +41,49 @@ def Tokenizer(texts, method="BERT", max_length=128):
         max_length=max_length,
         return_tensors=None  # keep as Python lists
     )
+  
+  required_cols = ["input_ids", "attention_mask"]
+  for col in required_cols: 
+    if col not in encodings:
+      raise KeyError(f"Tokenizer output missing required field: {col}")
 
-  tokens_df = pd.DataFrame(encodings)
+  return pd.DataFrame({
+    "input_ids": encodings["input_ids"],
+    "attention_mask": encodings["attention_mask"]
+  })
 
-  return tokens_df
+
+# result = Tokenizer(data["review"], method="BERT")
+# result = Tokenizer(data["review"], method="GPT-2")
+
+# ========== BERT tokenizer mechanism ==========
+# WORDS: One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked. '
+# 'They are right, as this is exactly what happened with me.The first thing that struck me about Oz was its '
+# 'brutality and unflinching scenes of violence, which set in right from the word GO. Trust me, this is not a show for the '
+# 'faint hearted or timid. This show pulls no punches with regards to drugs, sex or violence. Its is hardcore, in the classic '
+# 'use of the word.It is called OZ as that is the nickname given to the Oswald Maximum Security State Penitentary. It focuses mainly '
+# 'on Emerald City, an experimental section of the prison where all the cells have glass fronts and face inwards, so privacy is not '
+# 'high on the agenda. Em City is home to many..Aryans, Muslims, gangstas, Latinos, Christians, Italians, Irish and more....so scuffles, '
+# 'death stares, dodgy dealings and shady agreements are never far away.I would say the main appeal of the show is due to the fact that '
+# 'it goes where other shows wouldn't dare. Forget pretty pictures painted for mainstream audiences, forget charm, forget romance...OZ doesn't mess around. The first episode '
+# 'I ever saw struck me as so nasty it was surreal, I couldn't say I was ready for it, but as I watched more, I developed a taste for Oz, and got accustomed to the high levels of graphic violence. 
+# Not just violence, but injustice (crooked guards who'll be sold out for a nickel, inmates who'll kill on order and get away with it, well mannered, middle class inmates being turned into prison bitches 
+#                                   due to their lack of street skills or prison experience) Watching Oz, you may become comfortable with what is uncomfortable viewing....thats if you can get in touch with your darker side. 
+# -> TOKENS: ['one', 'of', 'the', 'other', 'reviewers', 'has', 'mentioned', 'that', 'after', 'watching', 'just', '1', 'oz', 'episode', 'you', "'", 'll', 'be', 'hooked', '.', 'they', 'are', 'right', ',', 'as', 'this', 'is', 'exactly', 
+#             'what', 'happened', 'with', 'me', '.', 'the', 'first', 'thing', 'that', 'struck', 'me', 'about', 'oz', 'was', 'its', 'brutality', 'and', 'un', '##fl', '##in', '##ching', 'scenes']
 
 
-Tokenizer(data["review"], method="BERT")
-Tokenizer(data["review"], method="GPT-2")
+
+# ========== GPT-2 tokenizer mechanism ==========
+# WORDS: One of the other reviewers has mentioned that after watching just 1 Oz episode you'll be hooked. They are right, as this is exactly what happened with me.The first thing that struck me about Oz '
+# 'was its brutality and unflinching scenes of violence, which set in right from the word GO. Trust me, this is not a show for the faint hearted or timid. This show pulls no punches with regards to drugs, '
+# 'sex or violence. Its is hardcore, in the classic use of the word.It is called OZ as that is the nickname given to the Oswald Maximum Security State Penitentary. It focuses mainly on Emerald City, '
+# 'an experimental section of the prison where all the cells have glass fronts and face inwards, so privacy is not high on the agenda. Em City is home to many..Aryans, Muslims, gangstas, Latinos, Christians, '
+# 'Italians, Irish and more....so scuffles, death stares, dodgy dealings and shady agreements are never far away.I would say the main appeal of the show is due to the fact that it goes where other shows wouldn't dare. 
+# Forget pretty pictures painted for mainstream audiences, forget charm, forget romance...OZ doesn't mess around. The first episode I ever saw struck me as so nasty it was surreal, I couldn't say I was ready for it, but as 
+# I watched more, I developed a taste for Oz, and got accustomed to the high levels of graphic violence. Not just violence, but injustice (crooked guards who'll be sold out for a nickel, inmates who'll kill on order and 
+# get away with it, well mannered, middle class inmates being turned into prison bitches due to their lack of street skills or prison experience) Watching Oz, you may become comfortable with 
+# what is uncomfortable viewing....thats if you can get in touch with your darker side. 
+# -> TOKENS: ['One', 'Ġof', 'Ġthe', 'Ġother', 'Ġreviewers', 'Ġhas', 'Ġmentioned', 'Ġthat', 'Ġafter', 'Ġwatching', 'Ġjust', 'Ġ1', 'ĠOz', 'Ġepisode', 'Ġyou', "'ll", 'Ġbe', 'Ġhooked', '.', 
+# 'ĠThey', 'Ġare', 'Ġright', ',', 'Ġas', 'Ġthis', 'Ġis', 'Ġexactly', 'Ġwhat', 'Ġhappened', 'Ġwith', 'Ġme', '.', 'The', 'Ġfirst', 'Ġthing', 'Ġthat', 'Ġstruck', 'Ġme', 'Ġabout', 'ĠOz', 
+# 'Ġwas', 'Ġits', 'Ġbrutality', 'Ġand', 'Ġunfl', 'inch', 'ing', 'Ġscenes', 'Ġof', 'Ġviolence']
